@@ -84,69 +84,101 @@ classDiagram
         +sortByDate()
         +clearFilters()
     }
+```
 
 
 
-ER
 
 ```mermaid
-erDiagram
-    USER ||--o{ REVIEW : "writes"
-    USER ||--o{ FAVORITE : "saves"
-    USER ||--o| ADMIN : "is extended as"
+classDiagram
+    direction TB
 
-    TRAIL ||--o{ REVIEW : "has"
-    TRAIL ||--o{ FAVORITE : "is favorited in"
-
-    USER {
-        int id PK
-        string name
-        string email
-        string password
-        string role
+    class User {
+        +int id
+        +string name
+        +string email
+        +string password
+        +string role
+        +register()
+        +login()
+        +logout()
+        +updateProfile()
+        +viewFavorites()
+        +addFavorite()
+        +removeFavorite()
+        +addReview()
+        +viewMyReviews()
     }
 
-    ADMIN {
-        int id PK, FK
+    class Admin {
+        +addTrail()
+        +updateTrail()
+        +deactivateTrail()
+        +uploadTrailImages()
+        +updateTrailRoute()
     }
 
-    TRAIL {
-        int id PK
-        string name
-        string description
-        string region
-        string difficulty
-        float distance
-        time estimatedDuration
-        string images
-        boolean isOfficial
-        point startPoint
-        point endPoint
-        json routeCoordinates
-        string status
-        datetime createdAt
+    class Trail {
+        +int id
+        +string name
+        +string description
+        +string region
+        +string difficulty
+        +float distance
+        +time estimatedDuration
+        +Array images
+        +boolean isOfficial
+        +Point startPoint
+        +Point endPoint
+        +Route routeCoordinates
+        +string status
+        +DateTime createdAt
+        +getDetails()
+        +getLocation()
+        +getRoute()
+        +isActive()
+        +calculateAverageRating()
+        +getReviews()
     }
 
-    REVIEW {
-        int id PK
-        int userId FK
-        int trailId FK
-        int rating
-        string comment
-        datetime createdAt
+    class Review {
+        +int id
+        +int userId
+        +int trailId
+        +int rating
+        +string comment
+        +DateTime createdAt
+        +addReview()
+        +updateReview()
+        +deleteReview()
+        +getReview()
+        +validateRating()
     }
 
-    FAVORITE {
-        int userId PK, FK
-        int trailId PK, FK
-        datetime createdAt
+    class Favorite {
+        +int userId
+        +int trailId
+        +DateTime createdAt
+        +addFavorite()
+        +removeFavorite()
+        +isFavorite()
+        +getUserFavorites()
     }
-```
+
+    class TrailService {
+        +searchByName()
+        +filterByRegion()
+        +filterByDifficulty()
+        +sortByRating()
+        +sortByDate()
+        +clearFilters()
+    }
 
     %% Relationships
     User <|-- Admin : inherits
-    User "1" -- "0..*" Review : writes
-    User "1" -- "0..*" Favorite : saves
-    Trail "1" -- "0..*" Review : receives
-    Trail "1" -- "0..*" Favorite : saved_in
+    User "1" --> "0..*" Review : writes
+    User "1" --> "0..*" Favorite : saves
+    Trail "1" --> "0..*" Review : receives
+    Trail "1" --> "0..*" Favorite : saved_in
     TrailService ..> Trail : manages/searches
+```
