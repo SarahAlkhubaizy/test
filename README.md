@@ -1,14 +1,93 @@
-# 2. Components, Classes, and Database Design
+# Section 2: Components, Classes, and Database Design
 
-## 2.1 Back-End Design (Classes & Methods)
+## 1. Back-End Component & Class Descriptions
 
-### Class Descriptions:
-- **User:** Represents system users (Hikers).
-- **Admin:** Extends `User` with administrative privileges (e.g., managing trails).
-- **Trail:** Represents trail routes and their attributes.
-- **Review:** Manages user ratings and feedback for trails.
-- **Favorite:** Manages user saved trails.
-- **TrailService:** Utility class for searching, filtering, and sorting trails.
+The back-end layer handles business logic, user authentication, trail management, and data query processing.
+
+### Core Classes
+
+#### 1. User
+Represents standard users interacting with the platform.
+* **Attributes:**
+  * `id`: `int` — Unique identifier for the user.
+  * `name`: `string` — Full name of the user.
+  * `email`: `string` — Unique user email address.
+  * `password`: `string` — Hashed user password.
+  * `role`: `string` — Role identifier (e.g., `"USER"`).
+* **Methods:**
+  * `register()`: Registers a new user account.
+  * `login()`: Authenticates the user.
+  * `logout()`: Terminates the active session.
+  * `updateProfile()`: Modifies personal details.
+  * `viewFavorites()` / `addFavorite()` / `removeFavorite()`: Manages bookmarked trails.
+  * `addReview()` / `viewMyReviews()`: Creates and views user feedback.
+
+#### 2. Admin (Inherits from User)
+Extends the `User` class to grant administrative privileges for content moderation and trail management.
+* **Attributes:** Inherits all attributes from `User`.
+* **Methods:**
+  * `addTrail()` / `updateTrail()` / `deactivateTrail()`: Handles lifecycle operations for trails.
+  * `uploadTrailImages()`: Uploads media files associated with a trail.
+  * `updateTrailRoute()`: Updates geospatial coordinates for a trail route.
+
+#### 3. Trail
+Represents a hiking or walking route managed in the system.
+* **Attributes:**
+  * `id`: `int` — Unique identifier.
+  * `name`: `string` — Name of the trail.
+  * `description`: `string` — Detailed summary of the trail.
+  * `region`: `string` — Geographic region/city.
+  * `difficulty`: `string` — Difficulty rating (e.g., Easy, Moderate, Hard).
+  * `distance`: `float` — Total length in kilometers.
+  * `estimatedDuration`: `time` — Expected completion time.
+  * `images`: `Array` — List of image URLs.
+  * `isOfficial`: `boolean` — Flag indicating whether the trail is verified.
+  * `startPoint` / `endPoint`: `Point` — Geographic coordinates for start and end locations.
+  * `routeCoordinates`: `Route` — Array/Polyline of GPS points representing the path.
+  * `status`: `string` — Current state (e.g., Active, Closed).
+  * `createdAt`: `DateTime` — Record creation timestamp.
+* **Methods:**
+  * `getDetails()` / `getLocation()` / `getRoute()`: Retrieves trail metadata and GIS data.
+  * `isActive()`: Checks if the trail is accessible.
+  * `calculateAverageRating()`: Computes aggregate user score.
+  * `getReviews()`: Retrieves associated reviews.
+
+#### 4. Review
+Encapsulates user feedback and ratings for specific trails.
+* **Attributes:**
+  * `id`: `int` — Unique review identifier.
+  * `userId`: `int` — Foreign key referencing `User`.
+  * `trailId`: `int` — Foreign key referencing `Trail`.
+  * `rating`: `int` — Numeric rating score (1 to 5).
+  * `comment`: `string` — Textual review body.
+  * `createdAt`: `DateTime` — Timestamp of creation.
+* **Methods:**
+  * `addReview()` / `updateReview()` / `deleteReview()` / `getReview()`: CRUD operations for reviews.
+  * `validateRating()`: Ensures submitted rating falls within 1–5 range.
+
+#### 5. Favorite
+Represents a junction/association entity for user bookmarks.
+* **Attributes:**
+  * `userId`: `int` — Foreign key referencing `User`.
+  * `trailId`: `int` — Foreign key referencing `Trail`.
+  * `createdAt`: `DateTime` — Timestamp when added.
+* **Methods:**
+  * `addFavorite()` / `removeFavorite()`: Toggles saved status.
+  * `isFavorite()`: Checks if a trail is bookmarked by a specific user.
+  * `getUserFavorites()`: Fetches all saved items for a user.
+
+#### 6. TrailService
+Utility service class handling query processing, filtering, and sorting logic for trails.
+* **Methods:**
+  * `searchByName(name: string)`
+  * `filterByRegion(region: string)`
+  * `filterByDifficulty(difficulty: string)`
+  * `sortByRating()` / `sortByDate()`
+  * `clearFilters()`
+
+---
+
+## 2. Class Diagram
 
 ```mermaid
 classDiagram
@@ -85,84 +164,4 @@ classDiagram
         +addFavorite()
         +removeFavorite()
         +isFavorite()
-        +getUserFavorites()
-    }
-
-    class TrailService {
-        +searchByName()
-        +filterByRegion()
-        +filterByDifficulty()
-        +sortByRating()
-        +sortByDate()
-        +clearFilters()
-    }
-
-    %% Relationships
-    User <|-- Admin : inherits
-    User "1" -- "0..*" Review : writes
-    User "1" -- "0..*" Favorite : saves
-    Trail "1" -- "0..*" Review : receives
-    Trail "1" -- "0..*" Favorite : saved_in
-    TrailService ..> Trail : manages/searches
-
-
-```
-## 2.2 Database Design (Relational ERD)
-
-```mermaid
-erDiagram
-    users ||--o{ reviews : "writes"
-    users ||--o{ favorites : "has"
-    users ||--o| admins : "is"
-
-    trails ||--o{ reviews : "belongs to"
-    trails ||--o{ favorites : "belongs to"
-
-    users {
-        int id PK
-        string name
-        string email
-        string password
-        string role
-    }
-
-    admins {
-        int user_id PK, FK
-    }
-
-    trails {
-        int id PK
-        string name
-        string description
-        string region
-        string difficulty
-        float distance
-        time estimated_duration
-        string status
-    }
-
-    reviews {
-        int id PK
-        int user_id FK
-        int trail_id FK
-        int rating
-        text comment
-    }
-
-    favorites {
-        int user_id PK, FK
-        int trail_id PK, FK
-    }
-```
-
----
-
-## 2.3 Front-End UI Components
-
-| Component Name | Description | Interactions |
-| :--- | :--- | :--- |
-| **AuthForms** | Handles user registration and login. | Submits user credentials to API to get Auth Tokens. |
-| **TrailCardList** | Displays cards for available trails with search/filter controls. | Triggers `TrailService` filters (Difficulty, Region, Rating). |
-| **TrailDetailsView** | Shows full information for a selected trail including route maps. | Fetches route coordinates and displays reviews. |
-| **ReviewSection** | Displays user reviews and provides a form to add new reviews. | Submits new ratings and updates average rating dynamically. |
-| **FavoriteButton** | Toggle button to save or remove trails from user favorites. | Sends request to `Favorite` API endpoint. |
+        +
