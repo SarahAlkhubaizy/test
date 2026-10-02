@@ -214,7 +214,7 @@ User "1" --> "0..*" Review : writes
 Trail "1" --> "0..*" Review : receives
 
 User "1" --> "0..*" Favorite : saves
-Trail "1" --> "0..*" Favorite : is saved in
+Trail "1" --> "0..*" Favorite : has
 
 TrailService ..> Trail : searches and filters
 Admin --> Trail : manages
@@ -225,7 +225,12 @@ Admin --> Review : moderates
 
 # 3. Database Design
 
-The system uses a relational database with the following tables:
+The system uses a relational database with the following main entities:
+
+* `Users`
+* `Trails`
+* `Reviews`
+* `Favorites`
 
 ### Users
 
@@ -258,137 +263,238 @@ The system uses a relational database with the following tables:
 
 ### Reviews
 
-| Field     | Type     | Key            |
-| --------- | -------- | -------------- |
-| id        | INT      | PK             |
-| userId    | INT      | FK → Users.id  |
-| trailId   | INT      | FK → Trails.id |
-| rating    | INT      |                |
-| comment   | TEXT     |                |
-| createdAt | DATETIME |                |
+| Field     | Type     | Key |
+| --------- | -------- | --- |
+| id        | INT      | PK  |
+| userId    | INT      | FK  |
+| trailId   | INT      | FK  |
+| rating    | INT      |     |
+| comment   | TEXT     |     |
+| createdAt | DATETIME |     |
 
 ### Favorites
 
-| Field     | Type     | Key                |
-| --------- | -------- | ------------------ |
-| userId    | INT      | PK, FK → Users.id  |
-| trailId   | INT      | PK, FK → Trails.id |
-| createdAt | DATETIME |                    |
+| Field     | Type     | Key    |
+| --------- | -------- | ------ |
+| userId    | INT      | PK, FK |
+| trailId   | INT      | PK, FK |
+| createdAt | DATETIME |        |
 
 ---
 
 # 4. ER Diagram
 
+The following ER diagram uses the traditional notation:
+
+* **Rectangle** = Entity
+* **Oval** = Attribute
+* **Diamond** = Relationship
+
 ```mermaid
-erDiagram
+flowchart LR
 
-    USERS {
-        INT id PK
-        VARCHAR name
-        VARCHAR email UK
-        VARCHAR password
-        VARCHAR role
-    }
+    %% =====================
+    %% USER ENTITY
+    %% =====================
 
-    TRAILS {
-        INT id PK
-        VARCHAR name
-        TEXT description
-        VARCHAR region
-        VARCHAR difficulty
-        FLOAT distance
-        VARCHAR estimatedDuration
-        TEXT images
-        BOOLEAN isOfficial
-        VARCHAR startPoint
-        VARCHAR endPoint
-        TEXT routeCoordinates
-        VARCHAR status
-        DATETIME createdAt
-    }
+    U[USER]
 
-    REVIEWS {
-        INT id PK
-        INT userId FK
-        INT trailId FK
-        INT rating
-        TEXT comment
-        DATETIME createdAt
-    }
+    Uid((id))
+    Uname((name))
+    Uemail((email))
+    Upass((password))
+    Urole((role))
 
-    FAVORITES {
-        INT userId PK, FK
-        INT trailId PK, FK
-        DATETIME createdAt
-    }
+    U --- Uid
+    U --- Uname
+    U --- Uemail
+    U --- Upass
+    U --- Urole
 
-    USERS ||--o{ REVIEWS : writes
-    TRAILS ||--o{ REVIEWS : receives
 
-    USERS ||--o{ FAVORITES : saves
-    TRAILS ||--o{ FAVORITES : has
+    %% =====================
+    %% TRAIL ENTITY
+    %% =====================
+
+    T[TRAIL]
+
+    Tid((id))
+    Tname((name))
+    Tdesc((description))
+    Tregion((region))
+    Tdiff((difficulty))
+    Tdistance((distance))
+    Tduration((estimatedDuration))
+    Timages((images))
+    Tofficial((isOfficial))
+    Tstart((startPoint))
+    Tend((endPoint))
+    Troute((routeCoordinates))
+    Tstatus((status))
+    Tcreated((createdAt))
+
+    T --- Tid
+    T --- Tname
+    T --- Tdesc
+    T --- Tregion
+    T --- Tdiff
+    T --- Tdistance
+    T --- Tduration
+    T --- Timages
+    T --- Tofficial
+    T --- Tstart
+    T --- Tend
+    T --- Troute
+    T --- Tstatus
+    T --- Tcreated
+
+
+    %% =====================
+    %% REVIEW ENTITY
+    %% =====================
+
+    R[REVIEW]
+
+    Rid((id))
+    Ruser((userId))
+    Rtrail((trailId))
+    Rrating((rating))
+    Rcomment((comment))
+    Rcreated((createdAt))
+
+    R --- Rid
+    R --- Ruser
+    R --- Rtrail
+    R --- Rrating
+    R --- Rcomment
+    R --- Rcreated
+
+
+    %% =====================
+    %% FAVORITE ENTITY
+    %% =====================
+
+    F[FAVORITE]
+
+    Fuser((userId))
+    Ftrail((trailId))
+    Fcreated((createdAt))
+
+    F --- Fuser
+    F --- Ftrail
+    F --- Fcreated
+
+
+    %% =====================
+    %% RELATIONSHIPS
+    %% =====================
+
+    RW{WRITES}
+    RC{RECEIVES}
+
+    FS{SAVES}
+    FH{HAS}
+
+    U --- RW
+    RW --- R
+
+    T --- RC
+    RC --- R
+
+    U --- FS
+    FS --- F
+
+    T --- FH
+    FH --- F
 ```
+
+### Relationships
+
+* A **User** can write many **Reviews**.
+* A **Trail** can receive many **Reviews**.
+* A **User** can save many **Favorites**.
+* A **Trail** can be saved by many users through **Favorites**.
 
 ---
 
 # 5. Front-end Components
 
-The main front-end components are:
+The front-end consists of the following main UI components:
 
-* **Home / Trail List**
+### Home / Trail List
 
-  * Displays available hiking trails.
-  * Provides access to search, filters, and sorting.
+* Displays available hiking trails.
+* Provides access to search, filtering, and sorting.
 
-* **Search Bar**
+### Search Bar
 
-  * Searches trails by name.
+* Allows users to search for a trail by name.
 
-* **Filter Component**
+### Filter Component
 
-  * Filters trails by region.
-  * Filters trails by difficulty.
+* Filters trails by region.
+* Filters trails by difficulty.
 
-* **Sort Component**
+### Sort Component
 
-  * Sorts trails by rating.
-  * Sorts trails by newest.
+* Sorts trails by highest rating.
+* Sorts trails by newest.
 
-* **Saudi Map**
+### Saudi Map
 
-  * Displays hiking trails across Saudi Arabia.
-  * Allows users to select a trail marker.
+* Displays hiking trails on a map of Saudi Arabia.
+* Allows users to select a trail marker and preview its information.
 
-* **Trail Details**
+### Trail Details
 
-  * Displays trail description, region, difficulty, distance, duration, images, and official approval status.
+Displays:
 
-* **Trail Route Map**
+* Trail name
+* Description
+* Region
+* Difficulty
+* Distance
+* Estimated duration
+* Images
+* Official approval status
 
-  * Displays the trail route with start and end points.
+### Trail Route Map
 
-* **Authentication**
+* Displays the hiking route.
+* Shows the start point and end point of the trail.
 
-  * Registration.
-  * Login.
-  * Logout.
+### Authentication
 
-* **Favorites**
+* Register
+* Login
+* Logout
 
-  * Allows registered users to save and remove favorite trails.
+### Favorites
 
-* **Reviews & Ratings**
+* Allows registered users to add trails to favorites.
+* Allows users to remove trails from favorites.
+* Displays saved trails.
 
-  * Displays reviews and average ratings.
-  * Allows registered users to submit ratings and comments.
+### Reviews & Ratings
 
-* **User Profile**
+* Displays user reviews.
+* Displays average trail rating.
+* Allows registered users to submit a rating and comment.
 
-  * Displays the user's saved trails and reviews.
+### User Profile
 
-* **Admin Dashboard**
+* Displays user information.
+* Displays saved favorite trails.
+* Displays the user's reviews.
 
-  * Add, edit, and deactivate trails.
-  * Upload trail images.
-  * Update trail routes.
-  * Manage user reviews.
+### Admin Dashboard
+
+* Add new trails.
+* Edit existing trails.
+* Deactivate trails.
+* Upload trail images.
+* Update trail routes.
+* Manage user reviews.
+
+```
+```
