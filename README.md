@@ -85,6 +85,64 @@ classDiagram
         +clearFilters()
     }
 
+
+
+
+
+```mermaid
+erDiagram
+    USER ||--o{ REVIEW : "writes"
+    USER ||--o{ FAVORITE : "saves"
+    USER ||--o| ADMIN : "is extended as"
+
+    TRAIL ||--o{ REVIEW : "has"
+    TRAIL ||--o{ FAVORITE : "is favorited in"
+
+    USER {
+        int id PK
+        string name
+        string email
+        string password
+        string role
+    }
+
+    ADMIN {
+        int id PK, FK
+    }
+
+    TRAIL {
+        int id PK
+        string name
+        string description
+        string region
+        string difficulty
+        float distance
+        time estimatedDuration
+        string images
+        boolean isOfficial
+        point startPoint
+        point endPoint
+        json routeCoordinates
+        string status
+        datetime createdAt
+    }
+
+    REVIEW {
+        int id PK
+        int userId FK
+        int trailId FK
+        int rating
+        string comment
+        datetime createdAt
+    }
+
+    FAVORITE {
+        int userId PK, FK
+        int trailId PK, FK
+        datetime createdAt
+    }
+```
+
     %% Relationships
     User <|-- Admin : inherits
     User "1" -- "0..*" Review : writes
