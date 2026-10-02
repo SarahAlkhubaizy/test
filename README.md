@@ -12,96 +12,33 @@
 
 ```mermaid
 classDiagram
-    direction TB
 
-    class User {
-        +int id
-        +string name
-        +string email
-        +string password
-        +string role
-        +register() void
-        +login() boolean
-        +logout() void
-        +updateProfile() void
-        +viewFavorites() Favorite[]
-        +addFavorite(trailId: int) void
-        +removeFavorite(favoriteId: int) void
-        +addReview(review: Review) void
-        +viewMyReviews() Review[]
-    }
+class User {
+    +int id
+    +string name
+    +string email
+    +string password
+    +string role
+    +register()
+    +login()
+    +logout()
+    +updateProfile()
+    +viewFavorites()
+    +addFavorite()
+    +removeFavorite()
+    +addReview()
+    +viewMyReviews()
+}
 
-    class Admin {
-        +addTrail(trail: Trail) void
-        +updateTrail(trailId: int, trail: Trail) void
-        +deactivateTrail(trailId: int) void
-        +uploadTrailImages(trailId: int, images: Image[]) void
-        +updateTrailRoute(trailId: int, route: Route) void
-    }
+class Admin {
+    +addTrail()
+    +updateTrail()
+    +deactivateTrail()
+    +uploadTrailImages()
+    +updateTrailRoute()
+}
 
-    class Trail {
-        +int id
-        +string name
-        +string description
-        +string region
-        +string difficulty
-        +float distance
-        +time estimatedDuration
-        +Image[] images
-        +boolean isOfficial
-        +Point startPoint
-        +Point endPoint
-        +Route routeCoordinates
-        +string status
-        +DateTime createdAt
-        +getDetails() Trail
-        +getLocation() Point[]
-        +getRoute() Route
-        +isActive() boolean
-        +calculateAverageRating() float
-        +getReviews() Review[]
-    }
-
-    class Review {
-        +int id
-        +int userId
-        +int trailId
-        +int rating
-        +string comment
-        +DateTime createdAt
-        +addReview() void
-        +updateReview(rating: int, comment: string) void
-        +deleteReview() void
-        +getReview() Review
-        +validateRating() boolean
-    }
-
-    class Favorite {
-        +int userId
-        +int trailId
-        +DateTime createdAt
-        +addFavorite() void
-        +removeFavorite() void
-        +isFavorite() boolean
-        +getUserFavorites() Favorite[]
-    }
-
-    class TrailService {
-        +searchByName(name: string) Trail[]
-        +filterByRegion(region: string) Trail[]
-        +filterByDifficulty(difficulty: string) Trail[]
-        +sortByRating() Trail[]
-        +sortByDate() Trail[]
-        +clearFilters() void
-    }
-
-    %% Relationships
-    User <|-- Admin : inherits
-    User "1" --> "0..*" Review : submits
-    User "1" --> "0..*" Favorite : marks
-    Trail "1" --> "0..*" Review : has reviews
-    Trail "1" --> "0..*" Favorite : is marked by
-    TrailService ..> Trail : searches / filters
+User <|-- Admin
 ```
 ## 2.2 Database Design (Relational ERD)
 
