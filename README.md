@@ -11,6 +11,8 @@
 * `email`
 * `password`
 * `role`
+* `language`
+* `currentLocation`
 
 **Methods:**
 
@@ -22,7 +24,12 @@
 * `addFavorite()`
 * `removeFavorite()`
 * `addReview()`
+* `editReview()`
+* `deleteReview()`
 * `viewMyReviews()`
+* `markTrailAsCompleted()`
+* `viewCompletedTrails()`
+* `getCurrentLocation()`
 
 ### Trail
 
@@ -36,10 +43,10 @@
 * `distance`
 * `estimatedDuration`
 * `images`
-* `isOfficial`
 * `startPoint`
 * `endPoint`
 * `routeCoordinates`
+* `safetyTips`
 * `status`
 * `createdAt`
 
@@ -48,6 +55,7 @@
 * `getDetails()`
 * `getLocation()`
 * `getRoute()`
+* `getSafetyTips()`
 * `isActive()`
 * `calculateAverageRating()`
 * `getReviews()`
@@ -86,6 +94,21 @@
 * `isFavorite()`
 * `getUserFavorites()`
 
+### CompletedTrail
+
+**Attributes:**
+
+* `userId`
+* `trailId`
+* `completedAt`
+
+**Methods:**
+
+* `markAsCompleted()`
+* `removeCompletedTrail()`
+* `getCompletedTrails()`
+* `isCompleted()`
+
 ### TrailService
 
 **Attributes:**
@@ -97,8 +120,6 @@
 * `searchByName()`
 * `filterByRegion()`
 * `filterByDifficulty()`
-* `sortByRating()`
-* `sortByDate()`
 * `clearFilters()`
 
 ### Admin
@@ -114,9 +135,11 @@
 
 * `addTrail()`
 * `updateTrail()`
-* `deactivateTrail()`
+* `deleteTrail()`
 * `uploadTrailImages()`
 * `updateTrailRoute()`
+* `deleteReview()`
+* `suspendUser()`
 
 ---
 
@@ -131,6 +154,8 @@ class User {
     +string email
     +string password
     +string role
+    +string language
+    +string currentLocation
     +register()
     +login()
     +logout()
@@ -139,7 +164,12 @@ class User {
     +addFavorite()
     +removeFavorite()
     +addReview()
+    +editReview()
+    +deleteReview()
     +viewMyReviews()
+    +markTrailAsCompleted()
+    +viewCompletedTrails()
+    +getCurrentLocation()
 }
 
 class Trail {
@@ -151,15 +181,16 @@ class Trail {
     +float distance
     +string estimatedDuration
     +string images
-    +boolean isOfficial
     +string startPoint
     +string endPoint
     +string routeCoordinates
+    +string safetyTips
     +string status
     +datetime createdAt
     +getDetails()
     +getLocation()
     +getRoute()
+    +getSafetyTips()
     +isActive()
     +calculateAverageRating()
     +getReviews()
@@ -189,12 +220,20 @@ class Favorite {
     +getUserFavorites()
 }
 
+class CompletedTrail {
+    +int userId
+    +int trailId
+    +datetime completedAt
+    +markAsCompleted()
+    +removeCompletedTrail()
+    +getCompletedTrails()
+    +isCompleted()
+}
+
 class TrailService {
     +searchByName()
     +filterByRegion()
     +filterByDifficulty()
-    +sortByRating()
-    +sortByDate()
     +clearFilters()
 }
 
@@ -205,9 +244,11 @@ class Admin {
     +string password
     +addTrail()
     +updateTrail()
-    +deactivateTrail()
+    +deleteTrail()
     +uploadTrailImages()
     +updateTrailRoute()
+    +deleteReview()
+    +suspendUser()
 }
 
 User "1" --> "0..*" Review : writes
@@ -216,9 +257,13 @@ Trail "1" --> "0..*" Review : receives
 User "1" --> "0..*" Favorite : saves
 Trail "1" --> "0..*" Favorite : is saved in
 
+User "1" --> "0..*" CompletedTrail : completes
+Trail "1" --> "0..*" CompletedTrail : is completed by
+
 TrailService ..> Trail : searches and filters
 Admin --> Trail : manages
 Admin --> Review : moderates
+Admin --> User : suspends
 ```
 
 ---
@@ -229,13 +274,15 @@ The system uses a relational database with the following tables:
 
 ### Users
 
-| Field    | Type    | Key    |
-| -------- | ------- | ------ |
-| id       | INT     | PK     |
-| name     | VARCHAR |        |
-| email    | VARCHAR | UNIQUE |
-| password | VARCHAR |        |
-| role     | VARCHAR |        |
+| Field           | Type    | Key    |
+| --------------- | ------- | ------ |
+| id              | INT     | PK     |
+| name            | VARCHAR |        |
+| email           | VARCHAR | UNIQUE |
+| password        | VARCHAR |        |
+| role            | VARCHAR |        |
+| language        | VARCHAR |        |
+| currentLocation | VARCHAR |        |
 
 ### Trails
 
@@ -249,10 +296,10 @@ The system uses a relational database with the following tables:
 | distance          | FLOAT    |     |
 | estimatedDuration | VARCHAR  |     |
 | images            | TEXT     |     |
-| isOfficial        | BOOLEAN  |     |
 | startPoint        | VARCHAR  |     |
 | endPoint          | VARCHAR  |     |
 | routeCoordinates  | TEXT     |     |
+| safetyTips        | TEXT     |     |
 | status            | VARCHAR  |     |
 | createdAt         | DATETIME |     |
 
@@ -275,6 +322,14 @@ The system uses a relational database with the following tables:
 | trailId   | INT      | PK, FK → Trails.id |
 | createdAt | DATETIME |                    |
 
+### CompletedTrails
+
+| Field       | Type     | Key                |
+| ----------- | -------- | ------------------ |
+| userId      | INT      | PK, FK → Users.id  |
+| trailId     | INT      | PK, FK → Trails.id |
+| completedAt | DATETIME |                    |
+
 ---
 
 # 4. ER Diagram
@@ -288,6 +343,8 @@ erDiagram
         VARCHAR email UK
         VARCHAR password
         VARCHAR role
+        VARCHAR language
+        VARCHAR currentLocation
     }
 
     TRAILS {
@@ -299,10 +356,10 @@ erDiagram
         FLOAT distance
         VARCHAR estimatedDuration
         TEXT images
-        BOOLEAN isOfficial
         VARCHAR startPoint
         VARCHAR endPoint
         TEXT routeCoordinates
+        TEXT safetyTips
         VARCHAR status
         DATETIME createdAt
     }
@@ -322,11 +379,20 @@ erDiagram
         DATETIME createdAt
     }
 
+    COMPLETED_TRAILS {
+        INT userId PK, FK
+        INT trailId PK, FK
+        DATETIME completedAt
+    }
+
     USERS ||--o{ REVIEWS : writes
     TRAILS ||--o{ REVIEWS : receives
 
     USERS ||--o{ FAVORITES : saves
     TRAILS ||--o{ FAVORITES : has
+
+    USERS ||--o{ COMPLETED_TRAILS : completes
+    TRAILS ||--o{ COMPLETED_TRAILS : is completed by
 ```
 
 ---
@@ -338,7 +404,7 @@ The main front-end components are:
 * **Home / Trail List**
 
   * Displays available hiking trails.
-  * Provides access to search, filters, and sorting.
+  * Provides access to search and filters.
 
 * **Search Bar**
 
@@ -349,19 +415,16 @@ The main front-end components are:
   * Filters trails by region.
   * Filters trails by difficulty.
 
-* **Sort Component**
-
-  * Sorts trails by rating.
-  * Sorts trails by newest.
-
 * **Saudi Map**
 
   * Displays hiking trails across Saudi Arabia.
   * Allows users to select a trail marker.
+  * Displays the trail starting point.
+  * Displays the user's current location with periodic updates.
 
 * **Trail Details**
 
-  * Displays trail description, region, difficulty, distance, duration, images, and official approval status.
+  * Displays trail description, region, difficulty, distance, duration, images, and safety tips.
 
 * **Trail Route Map**
 
@@ -372,6 +435,7 @@ The main front-end components are:
   * Registration.
   * Login.
   * Logout.
+  * Prompts guests to sign up when they try to save, rate, or review a trail.
 
 * **Favorites**
 
@@ -381,14 +445,35 @@ The main front-end components are:
 
   * Displays reviews and average ratings.
   * Allows registered users to submit ratings and comments.
+  * Allows users to edit or delete their own reviews.
+
+* **Completed Trails**
+
+  * Allows registered users to mark trails as completed.
+  * Displays the user's completed trails.
 
 * **User Profile**
 
   * Displays the user's saved trails and reviews.
+  * Allows users to edit their account information.
+
+* **Share Trail**
+
+  * Allows users to share a trail link with friends.
+
+* **Language Switcher**
+
+  * Allows users to switch between Arabic and English.
 
 * **Admin Dashboard**
 
-  * Add, edit, and deactivate trails.
+  * Add, edit, and delete trails.
   * Upload trail images.
   * Update trail routes.
-  * Manage user reviews.
+  * Delete inappropriate reviews.
+  * Suspend users.
+
+```
+
+**كذا هو نفس الـ README القديم تقريبًا حرفيًا من ناحية الترتيب والتنسيق، لكن محدث على الـ User Stories الجديدة.** أهم التغييرات: أضفنا `CompletedTrail`، و`Safety Tips`، و`Edit/Delete Reviews`، و`Delete Trail`، و`Suspend User`، والموقع الحالي واللغة، وشلنا الـ Sorting لأنه لم يعد موجودًا في الـ User Stories.
+```
