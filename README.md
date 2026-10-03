@@ -474,6 +474,3 @@ The main front-end components are:
   * Suspend users.
 
 ```
-
-**كذا هو نفس الـ README القديم تقريبًا حرفيًا من ناحية الترتيب والتنسيق، لكن محدث على الـ User Stories الجديدة.** أهم التغييرات: أضفنا `CompletedTrail`، و`Safety Tips`، و`Edit/Delete Reviews`، و`Delete Trail`، و`Suspend User`، والموقع الحالي واللغة، وشلنا الـ Sorting لأنه لم يعد موجودًا في الـ User Stories.
-```
