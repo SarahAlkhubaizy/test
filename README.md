@@ -124,12 +124,7 @@
 
 ### Admin
 
-**Attributes:**
-
-* `id`
-* `name`
-* `email`
-* `password`
+Admin inherits from the `User` class and provides additional administrative functions.
 
 **Methods:**
 
@@ -170,6 +165,16 @@ class User {
     +markTrailAsCompleted()
     +viewCompletedTrails()
     +getCurrentLocation()
+}
+
+class Admin {
+    +addTrail()
+    +updateTrail()
+    +deleteTrail()
+    +uploadTrailImages()
+    +updateTrailRoute()
+    +deleteReview()
+    +suspendUser()
 }
 
 class Trail {
@@ -237,19 +242,7 @@ class TrailService {
     +clearFilters()
 }
 
-class Admin {
-    +int id
-    +string name
-    +string email
-    +string password
-    +addTrail()
-    +updateTrail()
-    +deleteTrail()
-    +uploadTrailImages()
-    +updateTrailRoute()
-    +deleteReview()
-    +suspendUser()
-}
+User <|-- Admin
 
 User "1" --> "0..*" Review : writes
 Trail "1" --> "0..*" Review : receives
@@ -472,5 +465,3 @@ The main front-end components are:
   * Update trail routes.
   * Delete inappropriate reviews.
   * Suspend users.
-
-```
